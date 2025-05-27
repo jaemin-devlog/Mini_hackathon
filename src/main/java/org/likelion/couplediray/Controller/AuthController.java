@@ -22,7 +22,7 @@ public class AuthController {
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
         try {
             User savedUser = signupService.signup(request);
-            return ResponseEntity.ok("회원가입 성공! id=" + savedUser.getUserId());
+            return ResponseEntity.ok("회원가입 성공!! id=" + savedUser.getUserId());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
