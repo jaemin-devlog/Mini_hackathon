@@ -6,6 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class JoinRequest {
-    private Long userId;
-    private String code;
+    private String inviteCode;
 }

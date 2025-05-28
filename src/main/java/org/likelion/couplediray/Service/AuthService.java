@@ -22,6 +22,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .gender(request.getGender())
                 .build();
         return userRepository.save(user);
     }
@@ -32,8 +33,6 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("비밀번호를 확인해주세요.");
         }
-
-        return user; // 로그인 성공
+        return user;
     }
-
 }
