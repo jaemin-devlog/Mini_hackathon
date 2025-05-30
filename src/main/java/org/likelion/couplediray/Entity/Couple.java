@@ -21,6 +21,9 @@ public class Couple {
 
     private String inviteCode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private User creator;
     @OneToMany(mappedBy = "couple", cascade = CascadeType.ALL)
     private List<CoupleUser> coupleUsers = new ArrayList<>();
 }

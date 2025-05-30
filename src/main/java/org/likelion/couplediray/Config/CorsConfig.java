@@ -11,9 +11,9 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*") // ✅ 모든 출처 허용 (개발 중엔 OK)
+                .allowedOrigins("http://localhost:5500", "http://127.0.0.1:5500")// ✅ 정확한 출처만 허용
                 .allowedMethods("*")
                 .allowedHeaders("*")
-                .allowCredentials(false); // 세션 안 쓰면 false
+                .allowCredentials(true); // ✅ 세션 유지 가능
     }
 }
