@@ -28,8 +28,7 @@ public class CoupleService {
 
     @Transactional
     public String createInviteCode(User user) {
-        // 이미 커플로 연결됐으면 초대코드 못 생성
-        if (!coupleUserRepository.findByUser(user).isEmpty()) {
+        if (!coupleUserRepository.findByUserId(user.getUserId()).isEmpty()) {
             throw new RuntimeException("이미 커플로 연결된 사용자입니다.");
         }
 
@@ -38,7 +37,6 @@ public class CoupleService {
             inviteCode = inviteCodeGenerator.generateInviteCode();
         } while (coupleRepository.findByInviteCode(inviteCode).isPresent());
 
-        // 커플 엔티티 생성만 (유저 연결 안함!)
         Couple couple = new Couple();
         couple.setInviteCode(inviteCode);
         couple.setCreator(user);
@@ -49,8 +47,7 @@ public class CoupleService {
 
     @Transactional
     public void joinCouple(User user, String inviteCode) {
-        // 이미 연결된 유저는 다시 연결 못함
-        if (!coupleUserRepository.findByUser(user).isEmpty()) {
+        if (!coupleUserRepository.findByUserId(user.getUserId()).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 커플로 연결된 사용자입니다.");
         }
 
@@ -63,13 +60,11 @@ public class CoupleService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 커플이 모두 연결되어 있습니다.");
         }
 
-        // ✅ creator 가져오기
         User creator = couple.getCreator();
         if (creator == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "초대코드 생성자가 존재하지 않습니다.");
         }
 
-        // ✅ creator 아직 등록 안 됐으면 같이 연결
         boolean creatorAlreadyConnected = existing.stream()
                 .anyMatch(cu -> cu.getUser().getUserId().equals(creator.getUserId()));
 
@@ -80,7 +75,6 @@ public class CoupleService {
             coupleUserRepository.save(creatorCU);
         }
 
-        // ✅ join 요청자 등록
         CoupleUser coupleUser = new CoupleUser();
         coupleUser.setUser(user);
         coupleUser.setCouple(couple);

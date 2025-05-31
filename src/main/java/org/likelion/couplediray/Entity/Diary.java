@@ -21,4 +21,7 @@ public class Diary {
 
     @ManyToOne
     private Couple couple;
+
+    @Column(columnDefinition = "TEXT")
+    private String memo;
 }

@@ -55,10 +55,14 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             response.setContentType("application/json;charset=UTF-8");
                             User user = (User) authentication.getPrincipal();
+                            request.getSession().setAttribute("loginUser", user);
 
-                            List<CoupleUser> coupleUsers = coupleUserRepository.findByUser(user);
+                            // ✅ 여기만 수정
+                            List<CoupleUser> coupleUsers = coupleUserRepository.findByUserId(user.getUserId());
+
                             boolean connected = !coupleUsers.isEmpty() &&
                                     coupleUserRepository.findAllByCouple(coupleUsers.get(0).getCouple()).size() == 2;
+
                             response.getWriter().write("{\"message\": \"로그인 성공\", \"status\": \"" + (connected ? "CONNECTED" : "NOT_CONNECTED") + "\"}");
                             response.setStatus(200);
                         })

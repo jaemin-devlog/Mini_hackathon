@@ -36,4 +36,5 @@ public class CoupleController {
         coupleService.joinCouple(user, request.getInviteCode());
         return ResponseEntity.ok("커플 연결 완료");
     }
+
 }

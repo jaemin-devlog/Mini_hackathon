@@ -18,14 +18,14 @@ public class DiaryService {
     private final CoupleUserRepository coupleUserRepository;
 
     public String getDiary(User user, LocalDate date) {
-        Couple couple = coupleUserRepository.findByUser(user).get(0).getCouple();
+        Couple couple = coupleUserRepository.findByUserId(user.getUserId()).get(0).getCouple();
         return diaryRepository.findByCoupleAndDate(couple, date)
                 .map(Diary::getContent)
                 .orElse("");
     }
 
     public void saveDiary(User user, LocalDate date, String content) {
-        Couple couple = coupleUserRepository.findByUser(user).get(0).getCouple();
+        Couple couple = coupleUserRepository.findByUserId(user.getUserId()).get(0).getCouple();
 
         Diary diary = diaryRepository.findByCoupleAndDate(couple, date)
                 .orElseGet(() -> {
@@ -40,7 +40,31 @@ public class DiaryService {
     }
 
     public void deleteDiary(User user, LocalDate date) {
-        Couple couple = coupleUserRepository.findByUser(user).get(0).getCouple();
+        Couple couple = coupleUserRepository.findByUserId(user.getUserId()).get(0).getCouple();
         diaryRepository.deleteByCoupleAndDate(couple, date);
+    }
+
+    // ✅ 메모 저장
+    public void saveMemo(User user, LocalDate date, String memo) {
+        Couple couple = coupleUserRepository.findByUserId(user.getUserId()).get(0).getCouple();
+
+        Diary diary = diaryRepository.findByCoupleAndDate(couple, date)
+                .orElseGet(() -> {
+                    Diary newDiary = new Diary();
+                    newDiary.setDate(date);
+                    newDiary.setCouple(couple);
+                    return newDiary;
+                });
+
+        diary.setMemo(memo);
+        diaryRepository.save(diary);
+    }
+
+    // ✅ 메모 불러오기
+    public String getMemo(User user, LocalDate date) {
+        Couple couple = coupleUserRepository.findByUserId(user.getUserId()).get(0).getCouple();
+        return diaryRepository.findByCoupleAndDate(couple, date)
+                .map(Diary::getMemo)
+                .orElse("");
     }
 }
