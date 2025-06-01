@@ -1,4 +1,4 @@
-package org.likelion.hsu.recipememo.Dto;
+package org.likelion.hsu.recipememo.Dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class RecipeListResponseDto {
     private String category;
-    private List<RecipeTitleDto> recipes;
+    private List<RecipeTitleResponseDto> recipes;
 }

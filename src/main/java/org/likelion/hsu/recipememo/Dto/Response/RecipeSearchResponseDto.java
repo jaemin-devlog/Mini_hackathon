@@ -1,4 +1,4 @@
-package org.likelion.hsu.recipememo.Dto;
+package org.likelion.hsu.recipememo.Dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeSearchResponseDto {
-    private List<RecipeTitleDto> results;
+    private List<RecipeTitleResponseDto> results;
 }
 //검색 API의 응답 결과를 담는 리스트
 //RecipeTitleDto → 레시피의 id와 title만 담고 있는 간단한 DTO

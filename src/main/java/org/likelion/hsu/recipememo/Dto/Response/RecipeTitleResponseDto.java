@@ -1,4 +1,4 @@
-package org.likelion.hsu.recipememo.Dto;
+package org.likelion.hsu.recipememo.Dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,12 +10,16 @@ import org.likelion.hsu.recipememo.Entity.Recipe;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipeTitleDto {
+public class RecipeTitleResponseDto {
     private Long id;
     private String title;
     private String imageUrl;
 
-    public static RecipeTitleDto from(Recipe recipe) {
-        return new RecipeTitleDto(recipe.getId(), recipe.getTitle(), recipe.getImageUrl());
+    public static RecipeTitleResponseDto from(Recipe recipe) {
+        return new RecipeTitleResponseDto(
+                recipe.getId(),
+                recipe.getTitle(),
+                recipe.getImageUrl()
+        );
     }
 }
