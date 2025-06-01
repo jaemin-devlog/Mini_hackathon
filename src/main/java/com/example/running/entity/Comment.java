@@ -2,13 +2,15 @@ package com.example.running.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "comments")
 public class Comment {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
@@ -17,12 +19,17 @@ public class Comment {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "memo_id", nullable = false)
-    private Memo memo;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Builder
-    public Comment(String content, Memo memo) {
+    public Comment(String content, Post post, User user) {
         this.content = content;
-        this.memo = memo;
+        this.post = post;
+        this.user = user;
     }
 }

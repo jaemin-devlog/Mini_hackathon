@@ -13,7 +13,7 @@ public class NotificationResponseDto {
 
     public NotificationResponseDto(Notification notification) {
         this.content = notification.getContent();
-        this.postId = notification.getPost().getId();
+        this.postId = notification.getPost().getPostId();
         this.createdAt = notification.getCreatedAt();
     }
 }

@@ -1,7 +1,11 @@
 package com.example.running.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "scrap", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "post_id"})
@@ -31,27 +35,4 @@ public class Scrap {
         this.post = post;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public Post getPost() {
-        return post;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
-    }
 }

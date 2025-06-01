@@ -10,9 +10,6 @@ public class ScrapRequestDto {
     private Long userId;
     private Long postId;
 
-    public ScrapRequestDto() {
-    }
-
     public ScrapRequestDto(Long userId, Long postId) {
         this.userId = userId;
         this.postId = postId;

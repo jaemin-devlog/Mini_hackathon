@@ -1,6 +1,7 @@
 package com.example.running.service;
 
 import com.example.running.dto.PostResponseDto;
+import com.example.running.dto.PostUpdateRequestDto;
 import com.example.running.entity.Post;
 import com.example.running.entity.PostImage;
 import com.example.running.entity.Tag;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +41,7 @@ public class PostService {
 
         return posts.stream()
                 .map(post -> new PostResponseDto(
-                        post.getId(),
+                        post.getPostId(),
                         post.getTitle(),
                         post.getContent(),
                         post.getCreatedAt().toString(),
@@ -65,7 +67,87 @@ public class PostService {
         post.setUser(user);
 
         // 태그 처리
-        List<Tag> tags = new ArrayList<>();
+        handleTags(post, tagNames);
+
+        Post savedPost = postRepository.save(post);
+
+        // 이미지 처리
+        List<String> imageUrls = handleImages(savedPost, images);
+
+        return new PostResponseDto(
+                savedPost.getPostId(),
+                savedPost.getTitle(),
+                savedPost.getContent(),
+                savedPost.getCreatedAt().toString(),
+                imageUrls,
+                tagNames != null ? tagNames : new ArrayList<>()
+        );
+    }
+
+    // 게시글 수정
+    @Transactional
+    public PostResponseDto updatePost(Long postId, PostUpdateRequestDto updateRequestDto, MultipartFile[] images) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+
+        post.setTitle(updateRequestDto.getTitle());
+        post.setContent(updateRequestDto.getContent());
+        post.setUpdatedAt(LocalDateTime.now());
+
+        // 태그 처리
+        handleTags(post, Collections.singletonList(updateRequestDto.getTags()));
+
+        // 이미지 처리
+        List<String> imageUrls = handleImages(post, images);
+
+        postRepository.save(post);
+
+        return new PostResponseDto(
+                post.getPostId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getCreatedAt().toString(),
+                imageUrls,
+                updateRequestDto.getTags() != null ? Collections.singletonList(updateRequestDto.getTags()) : new ArrayList<>()
+        );
+    }
+
+    // 태그명으로 게시글 검색
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> getPostsByTagName(String tagName) {
+        List<Post> posts = postRepository.findAllByTags_Name(tagName);
+
+        return posts.stream()
+                .map(post -> new PostResponseDto(
+                        post.getPostId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getCreatedAt().toString(),
+                        post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
+                        post.getTags().stream().map(Tag::getName).collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    // 게시글 삭제
+    @Transactional
+    public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+
+        // 연관된 이미지도 함께 삭제됨 (orphanRemoval = true)
+        postRepository.delete(post);
+    }
+
+    // 태그 처리 공통 메서드
+    private void handleTags(Post post, List<String> tagNames) {
+        // 기존 태그 제거
+        List<Tag> existingTags = new ArrayList<>(post.getTags());
+        for (Tag tag : existingTags) {
+            post.removeTag(tag);
+        }
+
+        // 새로운 태그 추가
         if (tagNames != null) {
             for (String tagName : tagNames) {
                 Tag tag = tagRepository.findByName(tagName)
@@ -77,17 +159,24 @@ public class PostService {
                 post.addTag(tag);
             }
         }
+    }
 
-        Post savedPost = postRepository.save(post);
+    // 이미지 처리 공통 메서드
+    private List<String> handleImages(Post post, MultipartFile[] images) {
+        // 기존 이미지 삭제
+        List<PostImage> existingImages = new ArrayList<>(post.getImages());
+        for (PostImage image : existingImages) {
+            post.removeImage(image);
+            postImageRepository.delete(image);
+        }
 
-        // 이미지 처리
         List<String> imageUrls = new ArrayList<>();
         if (images != null) {
             for (MultipartFile image : images) {
                 try {
-                    String imageUrl = fileStorageService.uploadFile(image); // 여기 메서드명 변경에 맞게 수정
+                    String imageUrl = fileStorageService.uploadFile(image);
                     PostImage postImage = new PostImage();
-                    postImage.setPost(savedPost);
+                    postImage.setPost(post);
                     postImage.setImageUrl(imageUrl);
                     postImageRepository.save(postImage);
                     imageUrls.add(imageUrl);
@@ -96,31 +185,6 @@ public class PostService {
                 }
             }
         }
-
-        return new PostResponseDto(
-                savedPost.getId(),
-                savedPost.getTitle(),
-                savedPost.getContent(),
-                savedPost.getCreatedAt().toString(),
-                imageUrls,
-                tagNames != null ? tagNames : new ArrayList<>()
-        );
-    }
-
-    // 태그명으로 게시글 검색
-    @Transactional(readOnly = true)
-    public List<PostResponseDto> getPostsByTagName(String tagName) {
-        List<Post> posts = postRepository.findAllByTags_Name(tagName);
-
-        return posts.stream()
-                .map(post -> new PostResponseDto(
-                        post.getId(),
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getCreatedAt().toString(),
-                        post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
-                        post.getTags().stream().map(Tag::getName).collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());
+        return imageUrls;
     }
 }

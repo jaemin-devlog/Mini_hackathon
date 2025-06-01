@@ -74,7 +74,7 @@ public class ScrapService {
                     int scrapCount = scrapRepository.countByPost(post);
 
                     return new ScrapPostDto(
-                            post.getId(),
+                            post.getPostId(),
                             post.getTitle(),
                             post.getUser().getUsername(),
                             likeCount,

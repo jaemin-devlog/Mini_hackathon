@@ -2,6 +2,7 @@ package com.example.running.controller;
 
 import com.example.running.dto.PostRequestDto;
 import com.example.running.dto.PostResponseDto;
+import com.example.running.dto.PostUpdateRequestDto;
 import com.example.running.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +27,17 @@ public class PostController {
     // 게시글 작성 API (글 + 사진 + 태그)
     @PostMapping
     public ResponseEntity<PostResponseDto> createPost(
-            @RequestParam String title,
-            @RequestParam String content,
-            @RequestParam(required = false) List<String> tags,
-            @RequestPart(required = false) MultipartFile[] images,
-            @RequestParam Long userId) {  // 작성자 아이디
+            @ModelAttribute PostRequestDto requestDto,
+            @RequestPart(required = false) MultipartFile[] images) {
 
-        PostResponseDto response = postService.createPost(title, content, tags, images, userId);
+        PostResponseDto response = postService.createPost(
+                requestDto.getTitle(),
+                requestDto.getContent(),
+                requestDto.getTags(),
+                images,
+                requestDto.getUserId()
+        );
+
         return ResponseEntity.ok(response);
     }
 
@@ -41,5 +46,23 @@ public class PostController {
     public ResponseEntity<List<PostResponseDto>> getPostsByTag(@RequestParam String tagName) {
         List<PostResponseDto> posts = postService.getPostsByTagName(tagName);
         return ResponseEntity.ok(posts);
+    }
+
+    // 게시글 수정 API (글 + 사진 + 태그)
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponseDto> updatePost(
+            @PathVariable Long postId,
+            @ModelAttribute PostUpdateRequestDto updateRequestDto,
+            @RequestPart(required = false) MultipartFile[] images) {
+
+        PostResponseDto updatedPost = postService.updatePost(postId, updateRequestDto, images);
+        return ResponseEntity.ok(updatedPost);
+    }
+
+    // 게시글 삭제 API
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+        postService.deletePost(postId);
+        return ResponseEntity.noContent().build();
     }
 }

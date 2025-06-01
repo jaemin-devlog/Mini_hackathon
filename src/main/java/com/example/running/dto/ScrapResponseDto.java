@@ -11,9 +11,6 @@ public class ScrapResponseDto {
     private boolean scrapped;
     private int scrapCount;
 
-    public ScrapResponseDto() {
-    }
-
     public ScrapResponseDto(boolean scrapped, int scrapCount) {
         this.scrapped = scrapped;
         this.scrapCount = scrapCount;

@@ -1,6 +1,7 @@
 package com.example.running.service;
 
 import com.example.running.dto.LikeResponseDto;
+import com.example.running.dto.PostLikeInfoDto;
 import com.example.running.entity.Like;
 import com.example.running.entity.Post;
 import com.example.running.entity.User;
@@ -10,7 +11,9 @@ import com.example.running.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LikeService {
@@ -18,12 +21,12 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final BadgeService badgeService; // ✅ BadgeService 주입 추가
+    private final BadgeService badgeService;
 
     public LikeService(LikeRepository likeRepository,
                        PostRepository postRepository,
                        UserRepository userRepository,
-                       BadgeService badgeService) { // ✅ 생성자에 포함
+                       BadgeService badgeService) {
         this.likeRepository = likeRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
@@ -56,20 +59,41 @@ public class LikeService {
         // 3. 좋아요 개수 조회
         int likeCount = likeRepository.countByPost(post);
 
-        // ✅ 4. 사용자 총 좋아요 수 계산
+        // 4. 사용자 총 좋아요 수 계산
         int totalLikes = calculateUserTotalLikes(user);
 
-        // ✅ 5. 뱃지 부여 확인
+        // 5. 뱃지 부여 확인
         badgeService.checkAndAssignBadge(user, totalLikes);
 
         // 6. 결과 응답 DTO 반환
         return new LikeResponseDto(liked, likeCount);
     }
 
-    // ✅ 유저가 작성한 게시글들의 총 좋아요 수 계산
+    // 유저가 작성한 게시글들의 총 좋아요 수 계산
     private int calculateUserTotalLikes(User user) {
         return user.getPosts().stream()
-                .mapToInt(post -> likeRepository.countByPost(post))
+                .mapToInt(likeRepository::countByPost)
                 .sum();
+    }
+
+    // 내가 받은 총 좋아요 수 조회 (서비스 메서드)
+    public int getTotalLikes(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
+        return calculateUserTotalLikes(user);
+    }
+
+    // 내가 쓴 게시글별 좋아요 수 목록 조회 (서비스 메서드)
+    public List<PostLikeInfoDto> getMyPostLikeInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
+
+        return user.getPosts().stream()
+                .map(post -> new PostLikeInfoDto(
+                        post.getPostId(),
+                        post.getTitle(),
+                        likeRepository.countByPost(post)
+                ))
+                .collect(Collectors.toList());
     }
 }

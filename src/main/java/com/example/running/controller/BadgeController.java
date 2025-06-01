@@ -5,6 +5,7 @@ import com.example.running.entity.User;
 import com.example.running.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class BadgeController {
     }
 
     @GetMapping("/user/{userId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<BadgeResponse>> getUserBadges(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -30,5 +32,5 @@ public class BadgeController {
 
         return ResponseEntity.ok(badgeResponses);
     }
-}
+    }
 

@@ -19,13 +19,15 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SseEmitterManager emitterManager;
 
-    public void notifyComment(User receiver, User sender, Post post) {
+    public void notifyComment(User receiver, User sender, Post post, String commentContent) {
         // 본인이 본인 글에 댓글 단 경우 예외 처리
         if (receiver.getUserId().equals(sender.getUserId())) return;
 
+        String message = sender.getUsername() + " : "+commentContent;
+
         Notification notification = Notification.builder()
                 .receiver(receiver)
-                .content("누군가 당신의 게시글에 댓글을 남겼어요!")
+                .content(message)
                 .post(post)
                 .createdAt(LocalDateTime.now())
                 .build();

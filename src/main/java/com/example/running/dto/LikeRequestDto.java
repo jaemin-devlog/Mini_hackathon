@@ -8,8 +8,6 @@ import lombok.Setter;
 public class LikeRequestDto {
     private Long postId;
 
-    public LikeRequestDto() {}
-
     public LikeRequestDto(Long postId) {
         this.postId = postId;
     }

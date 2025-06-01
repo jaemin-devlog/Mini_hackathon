@@ -1,13 +1,11 @@
 package com.example.running.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import com.example.running.CommonResponse;
 import com.example.running.dto.CommentRequestDto;
 import com.example.running.dto.CommentResponseDto;
-import com.example.running.dto.MemoResponseDto;
 import com.example.running.entity.Comment;
 import com.example.running.service.CommentService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,24 +13,36 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/comments")
 @AllArgsConstructor
 public class CommentController {
+
     private final CommentService commentService;
 
-    @PostMapping("/{memoId}")
-    public ResponseEntity<CommonResponse<CommentResponseDto>> postComment(@PathVariable Long memoId, @RequestBody CommentRequestDto request) {
-        Comment comment = commentService.createComment(memoId, request);
+    // 댓글 생성
+    @PostMapping("/{postId}")
+    public ResponseEntity<CommonResponse<CommentResponseDto>> postComment(
+            @PathVariable Long postId,
+            @RequestParam Long userId,
+            @RequestBody CommentRequestDto request) {
+
+        Comment comment = commentService.createComment(postId, userId, request);
         CommentResponseDto response = new CommentResponseDto(comment);
+
         return ResponseEntity.ok()
                 .body(CommonResponse.<CommentResponseDto>builder()
                         .statusCode(200)
-                        .msg("게시글 번호 " + memoId + "댓글 생성이 완료되었습니다.")
+                        .msg("댓글 작성이 완료되었습니다.")
                         .data(response)
                         .build());
     }
 
+    // 댓글 수정
     @PutMapping("/{commentId}")
-    public ResponseEntity<CommonResponse<CommentResponseDto>> updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDto request) {
+    public ResponseEntity<CommonResponse<CommentResponseDto>> updateComment(
+            @PathVariable Long commentId,
+            @RequestBody CommentRequestDto request) {
+
         Comment comment = commentService.updateComment(commentId, request);
         CommentResponseDto response = new CommentResponseDto(comment);
+
         return ResponseEntity.ok()
                 .body(CommonResponse.<CommentResponseDto>builder()
                         .statusCode(200)
@@ -41,9 +51,11 @@ public class CommentController {
                         .build());
     }
 
+    // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<CommonResponse<Void>> deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
+
         return ResponseEntity.ok()
                 .body(CommonResponse.<Void>builder()
                         .statusCode(200)
