@@ -24,4 +24,7 @@ public class Diary {
 
     @Column(columnDefinition = "TEXT")
     private String memo;
+
+    @Column(columnDefinition = "TEXT")
+    private String bucketList;
 }

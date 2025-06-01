@@ -38,6 +38,11 @@ public class User implements UserDetails, Serializable {
     @Column(name = "gender")
     private String gender;
 
+    @Column(length = 100)
+    private String statusMessage;
+
+    @Column(name = "profile_image_url")  // DB 컬럼
+    private String profileImageUrl;
     @Builder
     public User(Long userId, String email, String password, String nickname, String gender) {
         this.userId = userId;

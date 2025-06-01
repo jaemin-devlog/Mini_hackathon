@@ -132,5 +132,29 @@ public class DiaryController {
         String memo = diaryService.getMemo(user, date);
         return ResponseEntity.ok(Map.of("memo", memo));
     }
+    @PostMapping("/bucket")
+    public ResponseEntity<Map<String, String>> saveBucketList(
+            HttpSession session,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam("bucket") String bucket) {
 
+        User user = getSessionUser(session);
+        validateCoupleConnection(user);
+
+        diaryService.saveBucketList(user, date, bucket);
+        return ResponseEntity.ok(Map.of("message", "버킷리스트 저장 완료"));
+    }
+
+    // ✅ 버킷리스트 조회
+    @GetMapping("/bucket")
+    public ResponseEntity<Map<String, String>> getBucketList(
+            HttpSession session,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        User user = getSessionUser(session);
+        validateCoupleConnection(user);
+
+        String bucket = diaryService.getBucketList(user, date);
+        return ResponseEntity.ok(Map.of("bucket", bucket));
+    }
 }
