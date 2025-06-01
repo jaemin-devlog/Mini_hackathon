@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>영화리뷰 블로그</title>
+    <style>
+        body {
+            font-family: '맑은 고딕', Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 10px;
+            background: #fafafa;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #searchArea {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            flex: 1;
+            padding: 8px;
+            font-size: 1rem;
+        }
+        #searchBtn {
+            padding: 8px 12px;
+            margin-left: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        #movieList {
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .movieItem {
+            border-bottom: 1px solid #ddd;
+            padding: 8px 5px;
+            cursor: pointer;
+            user-select: none;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .movieItem:last-child {
+            border-bottom: none;
+        }
+        .movieItem:hover {
+            background-color: #eef;
+        }
+        #pagination {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .pageBtn {
+            margin: 0 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #888;
+            border-radius: 3px;
+            background: white;
+        }
+        .pageBtn.active {
+            background: #337ab7;
+            color: white;
+            border-color: #2e6da4;
+        }
+        #commentForm {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            display: none;
+        }
+        #commentForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        #commentForm input[type="text"],
+        #commentForm textarea {
+            width: 100%;
+            padding: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        #commentForm button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #337ab7;
+            border: none;
+            border-radius: 3px;
+            color: white;
+        }
+        #commentForm button:hover {
+            background-color: #286090;
+        }
+        #detailArea {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            display: none;
+        }
+        #editArea input[type="text"],
+        #editArea textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        #editArea button {
+            padding: 8px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 3px;
+            font-size: 1rem;
+        }
+        #saveBtn {
+            background-color: #337ab7;
+            color: white;
+        }
+        #saveBtn:hover {
+            background-color: #286090;
+        }
+        #cancelBtn {
+            background-color: #bbb;
+            color: white;
+        }
+        #cancelBtn:hover {
+            background-color: #999;
+        }
+        #detailButtons button {
+            padding: 8px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 3px;
+            border: none;
+        }
+        #editBtn {
+            background-color: #5cb85c;
+            color: white;
+        }
+        #editBtn:hover {
+            background-color: #4cae4c;
+        }
+        #deleteBtn {
+            background-color: #d9534f;
+            color: white;
+        }
+        #deleteBtn:hover {
+            background-color: #c9302c;
+        }
+        #deleteBtn:disabled {
+            background-color: #f5a9a8;
+            cursor: not-allowed;
+        }
+        .likeBtn {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.3rem;
+            user-select: none;
+        }
+        .likeCount {
+            font-size: 1rem;
+            user-select: none;
+            margin-left: 5px;
+        }
+        /* 숨긴 id 표시용 */
+        #detailId {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>영화리뷰 블로그</h1>
+
+<div id="searchArea">
+    <input type="text" id="searchInput" placeholder="검색어를 입력하세요" />
+    <button id="searchBtn">검색</button>
+</div>
+
+<div id="movieList"></div>
+
+<div id="pagination"></div>
+
+<button id="addBtn" style="font-size: 2rem; padding: 10px 15px; border-radius: 50%; border: none; background-color: #337ab7; color: white; cursor: pointer;">
+    +
+</button>
+
+<div id="detailArea">
+    <h3 id="detailTitle"></h3>
+    <p id="detailContent"></p>
+    <p id="detailId"></p> <!-- 숨긴 ID 저장 -->
+
+    <div id="detailButtons">
+        <button id="editBtn">수정</button>
+        <button id="deleteBtn" disabled>삭제</button>
+    </div>
+
+    <div id="editArea" style="display:none; margin-top: 15px;">
+        <label for="editTitleInput">제목:</label>
+        <input type="text" id="editTitleInput" />
+
+        <label for="editContentInput">내용:</label>
+        <textarea id="editContentInput" rows="6"></textarea>
+
+        <button id="saveBtn">저장</button>
+        <button id="cancelBtn">취소</button>
+    </div>
+</div>
+
+<div id="commentForm">
+    <label for="commentTitle">제목:</label>
+    <input type="text" id="commentTitle" placeholder="제목을 입력하세요" />
+    <label for="commentContent">내용:</label>
+    <textarea id="commentContent" rows="6" placeholder="내용을 입력하세요"></textarea>
+    <button id="submitComment">생성</button>
+</div>
+
+<script>
+    const baseUrl = 'http://localhost:8081/api/movie';
+    const pageSize = 5;
+    let currentPage = 1;
+    let movies = [];
+    let selectedMovieId = null;
+
+    function renderPagination(totalItems) {
+        const pagination = document.getElementById('pagination');
+        const totalPages = Math.ceil(totalItems / pageSize);
+        pagination.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className = 'pageBtn';
+            if (i === currentPage) btn.classList.add('active');
+            btn.addEventListener('click', () => {
+                currentPage = i;
+                selectedMovieId = null;
+                renderMovieList();
+            });
+            pagination.appendChild(btn);
+        }
+    }
+
+    function renderMovieList() {
+        const listDiv = document.getElementById('movieList');
+        listDiv.innerHTML = '';
+        const startIndex = (currentPage - 1) * pageSize;
+        const pageItems = movies.slice(startIndex, startIndex + pageSize);
+
+        pageItems.forEach((movie, index) => {
+            const div = document.createElement('div');
+            div.className = 'movieItem';
+
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'likeBtn';
+            likeBtn.textContent = movie.likeCount > 0 ? '❤️' : '♡';
+            likeBtn.style.color = movie.likeCount > 0 ? 'red' : 'black';
+
+            const likeCountSpan = document.createElement('span');
+            likeCountSpan.className = 'likeCount';
+            likeCountSpan.textContent = ` ${movie.likeCount || 0}`;
+
+            likeBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+
+                try {
+                    const res = await fetch(`${baseUrl}/${movie.movieId}/like`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        movie.likeCount = data.likeCount;
+                        likeCountSpan.textContent = ` ${movie.likeCount}`;
+                        likeBtn.textContent = '❤️';
+                        likeBtn.style.color = 'red';
+                    } else {
+                        alert('좋아요 처리에 실패했습니다.');
+                    }
+                } catch (error) {
+                    alert('서버 오류가 발생했습니다.');
+                }
+            });
+
+            div.innerHTML = '';
+
+            const titleSpan = document.createElement('span');
+            titleSpan.textContent = `${startIndex + index + 1}. ${movie.title}`;
+
+            const likeGroup = document.createElement('div');
+            likeGroup.style.display = 'flex';
+            likeGroup.style.alignItems = 'center';
+            likeGroup.style.justifyContent = 'flex-end';
+            likeGroup.style.gap = '5px';
+            likeGroup.style.minWidth = '60px';
+
+            likeGroup.appendChild(likeBtn);
+            likeGroup.appendChild(likeCountSpan);
+
+            div.appendChild(titleSpan);
+            div.appendChild(likeGroup);
+
+            div.addEventListener('click', () => {
+                selectedMovieId = movie.movieId;
+                console.log('[DEBUG] 영화 클릭됨, selectedMovieId:', selectedMovieId);
+                showMovieDetail(movie);
+            });
+
+            listDiv.appendChild(div);
+        });
+
+        renderPagination(movies.length);
+        if (!selectedMovieId) hideDetailArea();
+    }
+
+    function showMovieDetail(movie) {
+        selectedMovieId = movie.movieId;
+        const detailArea = document.getElementById('detailArea');
+        detailArea.style.display = 'block';
+
+        document.getElementById('detailTitle').textContent = movie.title;
+        document.getElementById('detailContent').textContent = movie.content;
+
+        const detailIdEl = document.getElementById('detailId');
+        detailIdEl.textContent = movie.movieId;
+        console.log('[DEBUG] showMovieDetail - detailId:', detailIdEl.textContent); // 반드시 확인
+
+        document.getElementById('detailButtons').style.display = 'block';
+        document.getElementById('editArea').style.display = 'none';
+
+        document.getElementById('deleteBtn').disabled = false;
+    }
+
+    function hideDetailArea() {
+        const detailArea = document.getElementById('detailArea');
+        detailArea.style.display = 'none';
+        selectedMovieId = null;
+
+        document.getElementById('deleteBtn').disabled = true;
+    }
+
+    async function fetchMovies() {
+        const res = await fetch(`${baseUrl}/view`);
+        if (!res.ok) {
+            alert("영화 목록을 가져오는 데 실패했습니다.");
+            return;
+        }
+        movies = await res.json();
+        currentPage = 1;
+        selectedMovieId = null;
+        renderMovieList();
+    }
+
+    async function searchMovies() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        if (!keyword) {
+            fetchMovies();
+            return;
+        }
+        const res = await fetch(`${baseUrl}/search?keyword=${encodeURIComponent(keyword)}`);
+        if (!res.ok) {
+            alert("검색에 실패했습니다.");
+            return;
+        }
+        movies = await res.json();
+        currentPage = 1;
+        selectedMovieId = null;
+        renderMovieList();
+    }
+
+    async function submitComment() {
+        const title = document.getElementById('commentTitle').value.trim();
+        const content = document.getElementById('commentContent').value.trim();
+        if (!title || !content) {
+            alert('제목과 내용을 모두 입력해주세요.');
+            return;
+        }
+
+        const body = JSON.stringify({ title, content });
+        const headers = { 'Content-Type': 'application/json' };
+
+        const res = await fetch(baseUrl, {
+            method: 'POST',
+            headers,
+            body,
+        });
+        if (res.ok) {
+            alert('댓글이 생성되었습니다!');
+            document.getElementById('commentTitle').value = '';
+            document.getElementById('commentContent').value = '';
+            fetchMovies();
+        } else {
+            alert('댓글 생성에 실패했습니다.');
+        }
+    }
+
+    async function deleteMovie() {
+        const detailIdText = document.getElementById('detailId').textContent;
+        console.log('[DEBUG] deleteMovie - 읽은 detailId:', detailIdText);
+        const movieId = detailIdText ? Number(detailIdText) : null;
+
+        if (!movieId) {
+            alert('삭제할 아이템 ID가 없습니다.');
+            return;
+        }
+
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+
+        try {
+            const res = await fetch(`${baseUrl}/${movieId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                alert('삭제되었습니다.');
+                fetchMovies();
+                hideDetailArea();
+            } else {
+                const errorText = await res.text();
+                alert('삭제 실패: ' + errorText);
+            }
+        } catch (error) {
+            alert('서버 오류가 발생했습니다.');
+            console.error(error);
+        }
+    }
+
+    function startEdit() {
+        console.log('startEdit 호출됨');
+        console.log('selectedMovieId:', selectedMovieId);
+
+        if (!selectedMovieId) {
+            console.warn('selectedMovieId가 없습니다. 영화 목록에서 항목을 클릭해주세요.');
+            return;
+        }
+
+        const movie = movies.find(m => m.movieId === selectedMovieId);
+        console.log('찾은 movie:', movie);
+
+        if (!movie) {
+            console.warn('영화를 찾을 수 없습니다.');
+            return;
+        }
+
+        document.getElementById('editTitleInput').value = movie.title;
+        document.getElementById('editContentInput').value = movie.content;
+
+        document.getElementById('detailButtons').style.display = 'none';
+        document.getElementById('editArea').style.display = 'block';
+    }
+
+    function cancelEdit() {
+        document.getElementById('detailButtons').style.display = 'block';
+        document.getElementById('editArea').style.display = 'none';
+    }
+
+    async function saveEdit() {
+        if (!selectedMovieId) return;
+
+        const newTitle = document.getElementById('editTitleInput').value.trim();
+        const newContent = document.getElementById('editContentInput').value.trim();
+
+        if (!newTitle || !newContent) {
+            alert('제목과 내용을 모두 입력하세요.');
+            return;
+        }
+
+        const res = await fetch(`${baseUrl}/${selectedMovieId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: newTitle, content: newContent }),
+        });
+
+        if (res.ok) {
+            alert('수정되었습니다.');
+            const updatedMovie = await res.json();
+            const idx = movies.findIndex(m => m.movieId === selectedMovieId);
+            if (idx !== -1) {
+                movies[idx] = updatedMovie;
+            }
+            showMovieDetail(updatedMovie);
+            renderMovieList();
+        } else {
+            alert('수정 실패');
+        }
+    }
+
+    document.getElementById('addBtn').addEventListener('click', () => {
+        const form = document.getElementById('commentForm');
+        form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.getElementById('searchBtn').addEventListener('click', searchMovies);
+    document.getElementById('submitComment').addEventListener('click', submitComment);
+    document.getElementById('editBtn').addEventListener('click', startEdit);
+    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+    document.getElementById('saveBtn').addEventListener('click', saveEdit);
+    document.getElementById('deleteBtn').addEventListener('click', deleteMovie);
+
+    fetchMovies();
+</script>
+</body>
+</html>
