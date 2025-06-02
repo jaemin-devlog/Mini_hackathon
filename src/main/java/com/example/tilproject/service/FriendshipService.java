@@ -1,5 +1,6 @@
 package com.example.tilproject.service;
 
+import com.example.tilproject.dto.FriendRequestDto;
 import com.example.tilproject.entity.Friendship;
 import com.example.tilproject.entity.User;
 import com.example.tilproject.enums.FriendshipStatus;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,4 +63,16 @@ public class FriendshipService {
     public boolean isFriend(Long user1, Long user2) {
         return friendRepository.isFriend(user1, user2);
     }
+
+    // 받은 친구 요청 조회
+    public List<FriendRequestDto> getReceivedFriendRequests(Long userId) {
+        // "나에게 온 친구 요청"만 필터링 (PENDING 상태만, toUser가 나인 것)
+        List<Friendship> requests = friendRepository.findByToUser_UserIdAndStatus(userId, FriendshipStatus.REQUESTED);
+
+        return requests.stream()
+                .map(FriendRequestDto::new) // 위에서 만든 생성자 사용
+                .collect(Collectors.toList());
+    }
+
+
 }

@@ -50,4 +50,11 @@ public interface FriendRepository extends JpaRepository<Friendship, Long> {
             "AND f.status = 'ACCEPTED'")
     boolean isFriend(@Param("user1") Long user1, @Param("user2") Long user2);
 
+    @Query("""
+    SELECT f FROM Friendship f
+    WHERE f.toUser.userId = :toUserId AND f.status = :status
+""")
+    List<Friendship> findByToUserIdAndStatus(@Param("toUserId") Long toUserId, @Param("status") FriendshipStatus status);
+
+    List<Friendship> findByToUser_UserIdAndStatus(Long userId, FriendshipStatus status);
 }

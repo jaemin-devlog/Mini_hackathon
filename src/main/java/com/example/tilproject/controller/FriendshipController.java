@@ -1,11 +1,16 @@
 package com.example.tilproject.controller;
 
+import com.example.tilproject.dto.FriendRequestDto;
+import com.example.tilproject.dto.UserDto;
+import com.example.tilproject.entity.User;
 import com.example.tilproject.security.UserPrincipal;
 import com.example.tilproject.service.FriendshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/friendships")
@@ -29,7 +34,19 @@ public class FriendshipController {
     }
     // 친구 목록 조회
     @GetMapping("/list")
-    public ResponseEntity<?> getFriendList(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return ResponseEntity.ok(friendshipService.getFriendList(userPrincipal.getUserId()));
+    public ResponseEntity<List<UserDto>> getFriendList(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        List<User> friends = friendshipService.getFriendList(userPrincipal.getUserId());
+        List<UserDto> friendDtos = friends.stream()
+                .map(u -> new UserDto(u.getUserId(), u.getUsername(), u.getRole().toString()))
+                .toList();
+        return ResponseEntity.ok(friendDtos);
     }
+    @GetMapping("/requests")
+    public ResponseEntity<List<FriendRequestDto>> getReceivedFriendRequests(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        List<FriendRequestDto> dtos = friendshipService.getReceivedFriendRequests(userPrincipal.getUserId());
+        return ResponseEntity.ok(dtos);
+    }
+
+
+
 }

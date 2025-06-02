@@ -7,6 +7,8 @@ import com.example.tilproject.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AuthService {
     private final UserRepository userRepository;
@@ -37,6 +39,11 @@ public class AuthService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+    // 로그인한 사용자 제외 유저 리스트 반환
+    public List<User> getAllUsersExceptMe(Long myUserId) {
+        return userRepository.findAllExcept(myUserId);
     }
 
 }
